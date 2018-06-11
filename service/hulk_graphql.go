@@ -1,0 +1,156 @@
+package service
+
+import (
+	"github.com/graphql-go/graphql"
+	"github.com/andy-zhangtao/hulk/model"
+	"encoding/json"
+)
+
+var HulkType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "hulk",
+	Fields: graphql.Fields{
+		"name": &graphql.Field{
+			Type: graphql.String,
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				if h, ok := p.Source.(model.Hulk); ok {
+					return h.Name, nil
+				}
+				return nil, nil
+			},
+		},
+		"version": &graphql.Field{
+			Type: graphql.String,
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				if h, ok := p.Source.(model.Hulk); ok {
+					return h.Version, nil
+				}
+				return nil, nil
+			},
+		},
+		"time": &graphql.Field{
+			Type: graphql.String,
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				if h, ok := p.Source.(model.Hulk); ok {
+					return h.Time, nil
+				}
+				return nil, nil
+			},
+		},
+		"configure": &graphql.Field{
+			Type: graphql.String,
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				if h, ok := p.Source.(model.Hulk); ok {
+					data, err := json.Marshal(h.Configure)
+					if err != nil {
+						return nil, err
+					}
+					return string(data), nil
+				}
+				return nil, nil
+			},
+		},
+	},
+})
+
+var QueryAllHulk = &graphql.Field{
+	Type:        graphql.NewList(HulkType),
+	Description: "query all the hulk configure",
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		return queryALLHulk()
+	},
+}
+
+var QuerySpecifyHulk = &graphql.Field{
+	Type:        graphql.NewList(HulkType),
+	Description: "query specify hulk configure",
+	Args: graphql.FieldConfigArgument{
+		"name": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"version": &graphql.ArgumentConfig{
+			Type: graphql.String,
+		},
+	},
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		name, _ := p.Args["name"].(string)
+		version, _ := p.Args["version"].(string)
+
+		if version == "" {
+			return querySpecifyHulk(name)
+		}
+
+		return querySpecifyVersionHulk(name, version)
+	},
+}
+
+var SaveHulk = &graphql.Field{
+	Type:        HulkType,
+	Description: "add a new Hulk configure",
+	Args: graphql.FieldConfigArgument{
+		"name": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"version": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"configure": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+	},
+
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		name, _ := p.Args["name"].(string)
+		version, _ := p.Args["version"].(string)
+		configure, _ := p.Args["configure"].(string)
+
+		c := make(map[string]interface{})
+
+		err := json.Unmarshal([]byte(configure), &c)
+		if err != nil {
+			return nil, err
+		}
+
+		h := model.Hulk{
+			Name:      name,
+			Version:   version,
+			Configure: c,
+		}
+		return h, newHulk(h)
+	},
+}
+
+var UpdateHulk = &graphql.Field{
+	Type:        HulkType,
+	Description: "add a new Hulk configure",
+	Args: graphql.FieldConfigArgument{
+		"name": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"version": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"configure": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+	},
+
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		name, _ := p.Args["name"].(string)
+		version, _ := p.Args["version"].(string)
+		configure, _ := p.Args["configure"].(string)
+
+		c := make(map[string]interface{})
+
+		err := json.Unmarshal([]byte(configure), &c)
+		if err != nil {
+			return nil, err
+		}
+
+		h := model.Hulk{
+			Name:      name,
+			Version:   version,
+			Configure: c,
+		}
+		return h, updateHulk(h)
+	},
+}
