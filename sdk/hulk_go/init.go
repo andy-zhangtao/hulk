@@ -47,3 +47,6 @@ func init() {
 
 	padding(env)
 }
+
+// 为了支持dep管理, 引入一个空函数
+func Run(){}
