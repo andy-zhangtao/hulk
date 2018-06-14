@@ -34,3 +34,10 @@ func updateHulk(h model.Hulk) (err error) {
 		"version",
 	})
 }
+
+func deleteHulk(name, version string) (err error) {
+	return db.DeleteHulk(model.Hulk{
+		Name:    name,
+		Version: version,
+	})
+}

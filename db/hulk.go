@@ -6,7 +6,7 @@ import (
 )
 
 func FindAllHulk(h model.Hulk) (hulks []model.Hulk, err error) {
-	err = bw.FindAllWithSort(h, &hulks, []string{"+time"})
+	err = bw.FindAllWithSort(h, &hulks, []string{"-time"})
 	return
 }
 

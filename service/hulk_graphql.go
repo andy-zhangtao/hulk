@@ -55,8 +55,25 @@ var HulkType = graphql.NewObject(graphql.ObjectConfig{
 var QueryAllHulk = &graphql.Field{
 	Type:        graphql.NewList(HulkType),
 	Description: "query all the hulk configure",
+	Args: graphql.FieldConfigArgument{
+		"name": &graphql.ArgumentConfig{
+			Type: graphql.String,
+		},
+		"version": &graphql.ArgumentConfig{
+			Type: graphql.String,
+		},
+	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		return queryALLHulk()
+		name, _ := p.Args["name"].(string)
+		version, _ := p.Args["version"].(string)
+
+		if (name != "" && version != "") {
+			return querySpecifyVersionHulk(name, version)
+		} else if (name != "") {
+			return querySpecifyHulk(name)
+		}else{
+			return queryALLHulk()
+		}
 	},
 }
 
@@ -152,5 +169,27 @@ var UpdateHulk = &graphql.Field{
 			Configure: c,
 		}
 		return h, updateHulk(h)
+	},
+}
+
+var DeleteHulk = &graphql.Field{
+	Type:        HulkType,
+	Description: "Delete Specify Version Hulk",
+	Args: graphql.FieldConfigArgument{
+		"name": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"version": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+	},
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		name, _ := p.Args["name"].(string)
+		version, _ := p.Args["version"].(string)
+
+		return model.Hulk{
+			Name:    name,
+			Version: version,
+		}, deleteHulk(name, version)
 	},
 }
