@@ -29,8 +29,8 @@ func init() {
 
 	logrus.WithFields(log.Z.Fields(logrus.Fields{"Bwidown Init Success Version": bw.Version()})).Info(env.ModuleName)
 
-	bw.Map(model.Hulk{}, env.DB_HULK_CONFIGURE)
-	if err := bw.CheckIndex(new(model.Hulk)).Error(); err != nil {
+	bw.Map(model.Hulk{}, env.DB_HULK_CONFIGURE).Map(model.Register{}, env.DB_HULK_REGISTER)
+	if err := bw.CheckIndex(new(model.Hulk)).CheckIndex(new(model.Register)).Error(); err != nil {
 		logrus.WithFields(log.Z.Fields(logrus.Fields{"Check Index Error": err})).Error(env.ModuleName)
 		panic(err)
 	}

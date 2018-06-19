@@ -71,7 +71,7 @@ var QueryAllHulk = &graphql.Field{
 			return querySpecifyVersionHulk(name, version)
 		} else if (name != "") {
 			return querySpecifyHulk(name)
-		}else{
+		} else {
 			return queryALLHulk()
 		}
 	},
@@ -193,3 +193,5 @@ var DeleteHulk = &graphql.Field{
 		}, deleteHulk(name, version)
 	},
 }
+
+
