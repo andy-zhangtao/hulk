@@ -11,6 +11,8 @@ import (
 	"github.com/andy-zhangtao/hulk/service"
 	"github.com/andy-zhangtao/hulk/log"
 	"github.com/andy-zhangtao/hulk/env"
+	"context"
+	"strings"
 )
 
 func main() {
@@ -24,16 +26,19 @@ var rootDevexQuery = graphql.NewObject(graphql.ObjectConfig{
 	Name: "RootQuery",
 	Fields: graphql.Fields{
 		"queryHulk": service.QueryAllHulk,
-		//"currentUser":
+		"registers": service.QueryServiceRegister,
 	},
 })
 
 var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 	Name: "RootMutation",
 	Fields: graphql.Fields{
-		"addHulk":    service.SaveHulk,
-		"updateHulk": service.UpdateHulk,
-		"deleteHulk": service.DeleteHulk,
+		"addHulk":        service.SaveHulk,
+		"updateHulk":     service.UpdateHulk,
+		"deleteHulk":     service.DeleteHulk,
+		"addRegister":    service.NewServiceRegister,
+		"updateRegister": service.UpdateServiceRegister,
+		"deleteRegister": service.DeleteServiceRegister,
 	},
 })
 
@@ -42,12 +47,14 @@ var schemaDevex, _ = graphql.NewSchema(graphql.SchemaConfig{
 	Mutation: rootMutation,
 })
 
-func executeQuery(query map[string]interface{}, schema graphql.Schema) *graphql.Result {
+func executeQuery(query map[string]interface{}, schema graphql.Schema, ip string) *graphql.Result {
 
 	params := graphql.Params{
 		Schema:        schema,
 		RequestString: query["query"].(string),
 	}
+
+	params.Context = context.WithValue(context.Background(), env.RIP("RemoteIP"), strings.Split(ip, ":")[0])
 
 	if query["variables"] != nil {
 		params.VariableValues = query["variables"].(map[string]interface{})
@@ -69,7 +76,7 @@ func handleGraphQL(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		g = make(map[string]interface{})
 		g["query"] = r.URL.Query().Get("query")
-		result := executeQuery(g, schemaDevex)
+		result := executeQuery(g, schemaDevex, r.Header.Get("X-Forwarded-For"))
 		json.NewEncoder(w).Encode(result)
 	}
 
@@ -81,7 +88,7 @@ func handleGraphQL(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(err.Error())
 		}
 
-		result := executeQuery(g, schemaDevex)
+		result := executeQuery(g, schemaDevex, r.Header.Get("X-Forwarded-For"))
 		json.NewEncoder(w).Encode(result)
 	}
 }
