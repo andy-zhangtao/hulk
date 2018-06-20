@@ -27,6 +27,33 @@ var RegisterType = graphql.NewObject(graphql.ObjectConfig{
 				return nil, nil
 			},
 		},
+		"version": &graphql.Field{
+			Type: graphql.String,
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				if r, ok := p.Source.(model.Register); ok {
+					return r.Version, nil
+				}
+				return nil, nil
+			},
+		},
+		"time": &graphql.Field{
+			Type: graphql.String,
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				if r, ok := p.Source.(model.Register); ok {
+					return r.Time, nil
+				}
+				return nil, nil
+			},
+		},
+		"ip": &graphql.Field{
+			Type: graphql.String,
+			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				if r, ok := p.Source.(model.Register); ok {
+					return r.IP, nil
+				}
+				return nil, nil
+			},
+		},
 	},
 })
 
