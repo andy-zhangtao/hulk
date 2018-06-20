@@ -4,6 +4,7 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/andy-zhangtao/hulk/model"
 	"github.com/andy-zhangtao/hulk/env"
+	"strings"
 )
 
 var RegisterType = graphql.NewObject(graphql.ObjectConfig{
@@ -83,7 +84,11 @@ var NewServiceRegister = &graphql.Field{
 			IP:      p.Context.Value(env.RIP("RemoteIP")).(string),
 		}
 
-		return r, newRegister(r)
+		err := newRegister(r)
+		if err != nil && strings.Contains(err.Error(), "E11000") {
+			return r, updateRegister(r)
+		}
+		return r, err
 	},
 }
 

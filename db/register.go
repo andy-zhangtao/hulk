@@ -12,13 +12,13 @@ func FindAllRegister(r model.Register) (registers []model.Register, err error) {
 
 func AddNewRegister(r model.Register) (err error) {
 	t := time.Ztime{}
-	r.Time, _ = t.Now().Format("YYYY-MM-DD:hh-mm-ss")
+	r.Time, _ = t.Now().Format("YYYY-MM-DDThh:mm:ss")
 	return bw.Save(r)
 }
 
 func UpdateRegister(r model.Register, fields []string) (err error) {
 	t := time.Ztime{}
-	r.Time, _ = t.Now().Format("YYYY-MM-DD:hh-mm-ss")
+	r.Time, _ = t.Now().Format("YYYY-MM-DDThh:mm:ss")
 	_, err = bw.Update(&r, fields)
 	return
 }
