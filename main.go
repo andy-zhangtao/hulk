@@ -36,6 +36,7 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 		"addHulk":        service.SaveHulk,
 		"updateHulk":     service.UpdateHulk,
 		"deleteHulk":     service.DeleteHulk,
+		"copyHulk":       service.CopyHulk,
 		"addRegister":    service.NewServiceRegister,
 		"updateRegister": service.UpdateServiceRegister,
 		"deleteRegister": service.DeleteServiceRegister,

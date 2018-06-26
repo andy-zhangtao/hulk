@@ -4,6 +4,8 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/andy-zhangtao/hulk/model"
 	"encoding/json"
+	"errors"
+	"fmt"
 )
 
 var HulkType = graphql.NewObject(graphql.ObjectConfig{
@@ -194,4 +196,44 @@ var DeleteHulk = &graphql.Field{
 	},
 }
 
+var CopyHulk = &graphql.Field{
+	Type:        HulkType,
+	Description: "Copy Specify Version Hulk",
+	Args: graphql.FieldConfigArgument{
+		"name": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"version": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"newname": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+		"newversion": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.String),
+		},
+	},
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		name, _ := p.Args["name"].(string)
+		version, _ := p.Args["version"].(string)
+		newname, _ := p.Args["newname"].(string)
+		newversion, _ := p.Args["newversion"].(string)
 
+		h, err := querySpecifyVersionHulk(name, version)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(h) == 0 {
+			return nil, errors.New(fmt.Sprintf("Can Not Find This Hulk Name:[%s] Version:[%s]", name, version))
+		}
+
+		_h := model.Hulk{
+			Name:      newname,
+			Version:   newversion,
+			Configure: h[0].Configure,
+		}
+
+		return _h, newHulk(_h)
+	},
+}
